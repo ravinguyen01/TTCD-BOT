@@ -1,0 +1,33 @@
+services:
+  bot:
+    profiles: [online]
+    build: .
+    env_file: .env
+    environment:
+      GOOGLE_CREDENTIALS_PATH: /run/secrets/google.json
+      DATABASE_URL: postgresql://classbot:local_only_change_me@db:5432/classbot
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./secrets:/run/secrets:ro
+    restart: unless-stopped
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: classbot
+      POSTGRES_USER: classbot
+      POSTGRES_PASSWORD: local_only_change_me
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - classbot_pgdata:/var/lib/postgresql/data
+      - ./classbot/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U classbot -d classbot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  classbot_pgdata:

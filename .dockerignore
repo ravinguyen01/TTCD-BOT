@@ -1,0 +1,10 @@
+.git
+.env*
+!*.env.example
+plebot/
+secrets/
+tests/
+*.sqlite3
+**/__pycache__/
+**/*.pyc
+**/*_creds.json
